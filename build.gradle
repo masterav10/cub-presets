@@ -1,0 +1,66 @@
+plugins {
+	id 'java-library'
+	id 'eclipse'
+	id 'org.springframework.boot' version '2.4.5'
+}
+
+ext {
+	javacppVersion = "1.5.5"
+	cudaVersion = "11.2-8.1"
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+version "$cudaVersion-$javacppVersion"
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+  javacpp
+}
+
+sourceSets {
+	main {
+		resources {
+			srcDir "$buildDir/native"
+		}
+	}
+}
+
+dependencies {
+	javacpp "org.bytedeco:javacpp:$javacppVersion"
+	implementation "org.bytedeco:javacpp-platform:$javacppVersion"
+	implementation "org.bytedeco:cuda-platform:$cudaVersion-$javacppVersion"
+
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.assertj:assertj-core'
+	testImplementation 'org.mockito:mockito-core'
+}
+
+task javacppCompile(type: JavaExec) {
+	// Executable jars can have only _one_ jar on the classpath.
+	classpath = files(configurations.javacpp.asPath)
+	workingDir = sourceSets.main.java.outputDir
+	
+	def arch = "windows-x86_64"
+	
+	doFirst {
+		// arguments to pass to the application
+		args "thrust/Thrust"
+		args "-properties", "${arch}-cuda"
+		args "-nodelete"
+		args "-Xcompiler", "--gpu-architecture=sm_61"
+		args "-d", "${buildDir}/native/${arch}"
+	}
+}
+
+compileJava.finalizedBy javacppCompile
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
+}

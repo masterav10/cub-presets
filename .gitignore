@@ -1,0 +1,13 @@
+# Eclipse
+**/.gradle
+**/.settings
+**/bin
+**.classpath
+**.project
+
+# Freebuilder
+**.factorypath
+**/generated
+
+# Gradle
+**/build
