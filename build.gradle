@@ -1,15 +1,12 @@
 plugins {
 	id 'java-library'
 	id 'eclipse'
-	id 'org.springframework.boot' version '2.4.5'
 }
 
 ext {
-	javacppVersion = "1.5.5"
-	cudaVersion = "11.2-8.1"
+	javacppVersion = '1.5.5'
+	cudaVersion = '11.2-8.1'
 }
-
-apply plugin: 'io.spring.dependency-management'
 
 version "$cudaVersion-$javacppVersion"
 
@@ -30,6 +27,8 @@ sourceSets {
 }
 
 dependencies {
+	implementation platform("org.springframework.boot:spring-boot-dependencies:2.5.0")
+
 	javacpp "org.bytedeco:javacpp:$javacppVersion"
 	implementation "org.bytedeco:javacpp-platform:$javacppVersion"
 	implementation "org.bytedeco:cuda-platform:$cudaVersion-$javacppVersion"
@@ -50,8 +49,10 @@ task javacppCompile(type: JavaExec) {
 		// arguments to pass to the application
 		args "thrust/Thrust"
 		args "-properties", "${arch}-cuda"
-		args "-nodelete"
+		//args "-nodelete"
 		args "-Xcompiler", "--gpu-architecture=sm_61"
+		// issue with /GL and Thurst: https://github.com/bytedeco/javacpp/issues/485
+		args "-Xcompiler", "-Xcompiler=-GL-"
 		args "-d", "${buildDir}/native/${arch}"
 	}
 }
