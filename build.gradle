@@ -83,6 +83,7 @@ task jniJavacpp(type: JavaExec) {
 		// args "thrust/Thrust"
 		
 		args "org/bytedeco/cuda/global/cub"
+		args "org/bytedeco/cuda/cub/DeviceHistogram"
 		args "-properties", "${arch}-cuda"
 		args "-nodelete"
 		args "-Xcompiler", "--gpu-architecture=sm_61"
