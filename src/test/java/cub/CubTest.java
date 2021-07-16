@@ -2,6 +2,7 @@ package cub;
 
 import java.util.Arrays;
 
+import org.bytedeco.cuda.cub.DeviceHistogram;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -31,14 +32,14 @@ public class CubTest
         Pointer d_temp_storage = new Pointer();
         SizeTPointer temp_storage_bytes = new SizeTPointer(1L);
 
-        Cub.HistogramEven(d_temp_storage, temp_storage_bytes, d_samples, d_histogram, num_levels, lower_level,
-                upper_level, num_samples);
+        DeviceHistogram.HistogramEven(d_temp_storage, temp_storage_bytes, d_samples, d_histogram, num_levels,
+                lower_level, upper_level, num_samples);
         // Allocate temporary storage
         long bytes = temp_storage_bytes.get();
         cudart.cudaMalloc(d_temp_storage, bytes);
         // Compute histograms
-        Cub.HistogramEven(d_temp_storage, temp_storage_bytes, d_samples, d_histogram, num_levels, lower_level,
-                upper_level, num_samples);
+        DeviceHistogram.HistogramEven(d_temp_storage, temp_storage_bytes, d_samples, d_histogram, num_levels,
+                lower_level, upper_level, num_samples);
 
         int[] histogram = new int[8];
         d_histogram.asByteBuffer()

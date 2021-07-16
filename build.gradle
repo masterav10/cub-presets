@@ -16,17 +16,28 @@ repositories {
 }
 
 sourceSets {
-	main {
+	javacpp {
+		compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+		java {
+			srcDirs = ["${buildDir}/javacpp/java"]
+		}
 		resources {
-			srcDir "$buildDir/native"
+			srcDirs = ["${buildDir}/javacpp/resources"]
 		}
 	}
 }
 
+configurations {
+    javacppImplementation.extendsFrom implementation
+    javacppRuntimeOnly.extendsFrom runtimeOnly
+}
+
+
 dependencies {
 	implementation platform("org.springframework.boot:spring-boot-dependencies:2.5.0")
 
-	implementation "org.slf4j:slf4j-simple:1.7.30"
+	implementation "org.slf4j:slf4j-simple"
 	implementation "org.bytedeco:javacpp-platform:$javacppVersion"
 	implementation "org.bytedeco:cuda-platform:$cudaVersion-$javacppVersion"
 
@@ -35,7 +46,7 @@ dependencies {
 	testImplementation 'org.mockito:mockito-core'
 }
 
-task javacppCompile(type: JavaExec) {
+task javacppGenerate(type: JavaExec) {
 	// Executable jars can have only _one_ jar on the classpath.
 	classpath = files(configurations.runtimeClasspath.asPath)
 	mainClass = 'org.bytedeco.javacpp.tools.Builder'
@@ -48,19 +59,40 @@ task javacppCompile(type: JavaExec) {
 	
 	doFirst {
 		// arguments to pass to the application
+		args "org/bytedeco/cuda/presets/cub"
+		args "-properties", "${arch}-cuda"
+		args "-d", "${buildDir}/javacpp/java"
+	}
+}
+
+compileJavacppJava.dependsOn javacppGenerate
+
+task jniJavacpp(type: JavaExec) {
+	// Executable jars can have only _one_ jar on the classpath.
+	classpath = files(sourceSets.javacpp.compileClasspath)
+	mainClass = 'org.bytedeco.javacpp.tools.Builder'
+	workingDir = sourceSets.javacpp.java.outputDir
+	
+	// port 5005; can debug using eclipse Remote Java Application
+	debug = false
+	
+	def arch = "windows-x86_64"
+	
+	doFirst {
+		// arguments to pass to the application
 		// args "thrust/Thrust"
 		
-		args "org/bytedeco/cuda/presets/cub"
+		args "org/bytedeco/cuda/global/cub"
 		args "-properties", "${arch}-cuda"
 		args "-nodelete"
 		args "-Xcompiler", "--gpu-architecture=sm_61"
 		// issue with /GL and Thurst: https://github.com/bytedeco/javacpp/issues/485
 		args "-Xcompiler", "-Xcompiler=-GL-"
-		args "-d", "${buildDir}/native"
+		args "-d", "${buildDir}/javacpp/resources/${arch}"
 	}
 }
 
-compileJava.finalizedBy javacppCompile
+compileJavacppJava.finalizedBy jniJavacpp
 
 test {
 	useJUnitPlatform()
