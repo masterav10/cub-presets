@@ -1,5 +1,7 @@
 package cub;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.nio.IntBuffer;
 import java.util.Arrays;
 
@@ -57,8 +59,6 @@ public class CubTest
         IntBuffer buffer = histogramPtr.asBuffer();
         buffer.get(histogram);
 
-        System.out.println(Arrays.toString(histogram));
-
-        // d_histogram <-- [1, 0, 5, 0, 3, 0, 0, 0];
+        assertThat(histogram).containsExactly(1, 5, 0, 3, 0, 0);
     }
 }
