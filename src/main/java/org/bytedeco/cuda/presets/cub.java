@@ -15,7 +15,8 @@ import org.bytedeco.javacpp.tools.InfoMapper;
         value = {
             @Platform(
                 include = {
-                    "<cub/device/device_histogram.cuh>", 
+                    "<cub/device/device_histogram.cuh>",
+                    "<cub/device/device_scan.cuh>",
                 }
             )
         }
@@ -29,5 +30,9 @@ public class cub implements InfoMapper
     {
         infoMap.put(new Info("CUB_NS_PREFIX", "CUB_RUNTIME_FUNCTION").cppTypes().annotations());
         infoMap.put(new Info("cub::DeviceHistogram::HistogramEven<float*,int,float,int>").javaNames("HistogramEven"));
+        infoMap.put(new Info("cub::DeviceHistogram::HistogramRange<float*,int,float,int>").javaNames("HistogramRange"));
+        
+        infoMap.put(new Info("cub::DeviceScan::ExclusiveSum<int*,int*>").javaNames("ExclusiveSum"));
+        infoMap.put(new Info("cub::DeviceScan::InclusiveSum<int*,int*>").javaNames("InclusiveSum"));
     }
 }
