@@ -3,7 +3,6 @@ package cub;
 import static org.assertj.core.api.Assertions.*;
 
 import java.nio.IntBuffer;
-import java.util.Arrays;
 
 import org.bytedeco.cuda.cub.DeviceHistogram;
 import org.bytedeco.cuda.global.cudart;
@@ -30,8 +29,7 @@ public class CubTest
 
         FloatPointer d_samples = new FloatPointer();
         cudart.cudaMalloc(d_samples, num_samples * Float.BYTES);
-        cudart.cudaMemcpy(d_samples, new FloatPointer(samplesArray), num_samples * Float.BYTES,
-                cudart.cudaMemcpyHostToDevice);
+        cudart.cudaMemcpy(d_samples, samplesArray, num_samples * Float.BYTES, cudart.cudaMemcpyHostToDevice);
 
         int bins = num_levels - 1;
         IntPointer d_histogram = new IntPointer();
