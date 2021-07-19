@@ -1,6 +1,7 @@
 plugins {
 	id 'java-library'
 	id 'eclipse'
+	id 'antlr'
 }
 
 ext {
@@ -33,8 +34,9 @@ configurations {
     javacppRuntimeOnly.extendsFrom runtimeOnly
 }
 
-
 dependencies {
+	antlr 'org.antlr:antlr4:4.7.2'
+
 	implementation platform("org.springframework.boot:spring-boot-dependencies:2.5.0")
 
 	implementation "org.slf4j:slf4j-simple"
@@ -45,6 +47,12 @@ dependencies {
 	testImplementation 'org.assertj:assertj-core'
 	testImplementation 'org.mockito:mockito-core'
 }
+
+generateGrammarSource {
+	outputDirectory = file("build/generated-src/antlr/main/org/immersed/gaffe")
+    arguments += ["-package", "org.immersed.gaffe"]
+}
+
 
 task javacppGenerate(type: JavaExec) {
 	// Executable jars can have only _one_ jar on the classpath.
@@ -95,6 +103,8 @@ task jniJavacpp(type: JavaExec) {
 }
 
 compileJavacppJava.finalizedBy jniJavacpp
+
+task generateAll(dependsOn: [generateGrammarSource, compileJavacppJava])
 
 test {
 	useJUnitPlatform()
