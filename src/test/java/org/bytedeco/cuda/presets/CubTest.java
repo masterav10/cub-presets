@@ -1,4 +1,4 @@
-package cub;
+package org.bytedeco.cuda.presets;
 
 import static org.assertj.core.api.Assertions.*;
 
