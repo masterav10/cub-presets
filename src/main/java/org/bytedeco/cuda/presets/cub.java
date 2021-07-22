@@ -29,8 +29,24 @@ public class cub implements InfoMapper
     public void map(InfoMap infoMap)
     {
         infoMap.put(new Info("CUB_NS_PREFIX", "CUB_RUNTIME_FUNCTION").cppTypes().annotations());
+        
+        // cub::DeviceHistogram::HistogramEven<SampleIteratorT,CounterT,LevelT,OffsetT>
         infoMap.put(new Info("cub::DeviceHistogram::HistogramEven<float*,int,float,int>").javaNames("HistogramEven"));
+        
+        // cub::DeviceHistogram::MultiHistogramRange<NUM_CHANNELS,NUM_ACTIVE_CHANNELS,SampleIteratorT,CounterT,LevelT,OffsetT>
+        infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramRange<1,1,float*,int,float,int>").javaNames("MultiHistogramRange1Channel"));
+        infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramRange<2,2,float*,int,float,int>").javaNames("MultiHistogramRange2Channel"));
+        infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramRange<2,2,float*,int,float,int>").javaNames("MultiHistogramRange3Channel"));
+        infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramRange<3,3,float*,int,float,int>").javaNames("MultiHistogramRange4Channel"));
+        
+        // cub::DeviceHistogram::HistogramRange<SampleIteratorT,CounterT,LevelT,OffsetT>
         infoMap.put(new Info("cub::DeviceHistogram::HistogramRange<float*,int,float,int>").javaNames("HistogramRange"));
+        
+        // cub::DeviceHistogram::MultiHistogramEven<NUM_CHANNELS,NUM_ACTIVE_CHANNELS,SampleIteratorT,CounterT,LevelT,OffsetT>
+        infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramEven<1,1,float*,int,float,int>").javaNames("MultiHistogramEven1Channel"));
+        infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramEven<2,2,float*,int,float,int>").javaNames("MultiHistogramEven2Channel"));
+        infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramEven<3,3,float*,int,float,int>").javaNames("MultiHistogramEven3Channel"));
+        infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramEven<4,4,float*,int,float,int>").javaNames("MultiHistogramEven4Channel"));
         
         infoMap.put(new Info("cub::DeviceScan::ExclusiveSum<int*,int*>").javaNames("ExclusiveSum"));
         infoMap.put(new Info("cub::DeviceScan::InclusiveSum<int*,int*>").javaNames("InclusiveSum"));
