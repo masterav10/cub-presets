@@ -5,9 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.CharStream;
@@ -100,6 +102,8 @@ public class MethodPrinter
 
         private void print()
         {
+            Set<String> uniqueDefinitions = new HashSet<>();
+
             for (FunctionDefinition function : this.functions)
             {
                 StringBuilder builder = new StringBuilder();
@@ -123,8 +127,19 @@ public class MethodPrinter
                                        .map(s -> "<" + s + ">")
                                        .orElse(""));
 
-                System.out.println(builder.toString());
+                uniqueDefinitions.add(builder.toString());
             }
+
+            CubTemplates templates = new CubTemplates();
+
+            uniqueDefinitions.forEach(definition ->
+            {
+                System.out.println();
+                System.out.println("// " + definition);
+
+                templates.walk(definition)
+                         .forEach(System.out::println);
+            });
         }
     }
 
