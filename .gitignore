@@ -8,6 +8,7 @@
 # Freebuilder
 **.factorypath
 **/generated
+**.apt_generated**
 
 # Gradle
 **/build
