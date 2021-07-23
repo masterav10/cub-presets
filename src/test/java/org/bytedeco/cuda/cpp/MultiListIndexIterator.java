@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+
+import org.bytedeco.cuda.cpp.MultiListIndexIterator.Result;
 
 /**
  * Loops through all combinations of the provided iterators.
@@ -11,18 +14,38 @@ import java.util.List;
  * @author Dan Avila
  *
  */
-public class MultiListIndexIterator implements Iterator<String>
+public class MultiListIndexIterator implements Iterator<Result>
 {
+    public static final class Result
+    {
+        private final String newDefinition;
+        private final String newFunctionName;
+
+        public Result(String newDefinition, String newFunctionName)
+        {
+            this.newDefinition = newDefinition;
+            this.newFunctionName = newFunctionName;
+        }
+
+        @Override
+        public String toString()
+        {
+            return String.format("infoMap.put(new Info(\"%s\").javaNames(\"%s\"));", newDefinition, newFunctionName);
+        }
+    }
+
     private final List<TemplateResolver> resolvers;
+    private final String functionName;
     private final String definition;
     private final int[] indexes;
 
     private final int total;
     private int count;
 
-    public MultiListIndexIterator(String definition, List<TemplateResolver> resolvers)
+    public MultiListIndexIterator(String definition, String functionName, List<TemplateResolver> resolvers)
     {
         this.definition = definition;
+        this.functionName = functionName;
         this.resolvers = new ArrayList<>(resolvers);
 
         this.indexes = new int[this.resolvers.size()];
@@ -34,9 +57,9 @@ public class MultiListIndexIterator implements Iterator<String>
         this.count = 0;
     }
 
-    public MultiListIndexIterator(String definition, TemplateResolver... remaining)
+    public MultiListIndexIterator(String definition, String functionName, TemplateResolver... remaining)
     {
-        this(definition, Arrays.asList(remaining));
+        this(definition, functionName, Arrays.asList(remaining));
     }
 
     public boolean hasNext()
@@ -44,9 +67,10 @@ public class MultiListIndexIterator implements Iterator<String>
         return count < total;
     }
 
-    public String next()
+    public Result next()
     {
         String newDefinition = definition;
+        String newMethodName = functionName;
 
         for (int i = 0; i < resolvers.size(); i++)
         {
@@ -54,12 +78,20 @@ public class MultiListIndexIterator implements Iterator<String>
             TemplateResolver resolver = this.resolvers.get(i);
 
             newDefinition = resolver.resolve(index, newDefinition);
+
+            Optional<TemplateResolver> optional = resolver.methodName();
+
+            if (optional.isPresent())
+            {
+                TemplateResolver functionResolver = optional.get();
+                newMethodName = functionResolver.resolve(index, newMethodName);
+            }
         }
 
         adjustIndexArray(0);
         this.count++;
 
-        return newDefinition;
+        return new Result(newDefinition, newMethodName);
     }
 
     private void adjustIndexArray(int index)

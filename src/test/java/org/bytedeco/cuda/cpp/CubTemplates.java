@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.bytedeco.cuda.cpp.MultiListIndexIterator.Result;
+
 public class CubTemplates
 {
     private static final String[] POINTER_TYPES;
@@ -12,20 +14,28 @@ public class CubTemplates
     private static final String[] COUNTER_TYPES;
     private static final String[] OFFSET_TYPES;
 
+    private static final String[] CHANNEL_VALUES;
+    private static final String[] CHANNEL_SUFFIX;
+
     static
     {
         VALUE_TYPES = new String[]
-        { "float", "int" };
+        { "float", "int"};
 
         POINTER_TYPES = new String[VALUE_TYPES.length];
         Arrays.setAll(POINTER_TYPES, i -> VALUE_TYPES[i] + "*");
 
         OFFSET_TYPES = new String[]
-        { "int", "long" };
+        { "int" };
 
         COUNTER_TYPES = new String[OFFSET_TYPES.length];
         Arrays.setAll(COUNTER_TYPES, i -> "unsigned " + OFFSET_TYPES[i]);
 
+        CHANNEL_VALUES = new String[]
+        { "1", "2", "3", "4" };
+
+        CHANNEL_SUFFIX = new String[CHANNEL_VALUES.length];
+        Arrays.setAll(CHANNEL_SUFFIX, i -> CHANNEL_VALUES[i] + "Channel");
     }
 
     private static TemplateResolverByReplacement.Builder byReplacement()
@@ -48,17 +58,43 @@ public class CubTemplates
     {
         this.templates = new ArrayList<>();
 
-        add(aggregate(NUM_ACTIVE_CHANNELS(), NUM_CHANNELS()));
+        add(channels());
         add(aggregate(SampleIteratorT(), LevelT()));
+        add(aggregate(InputIteratorT(), OutputIteratorT()));
 
         add(CounterT());
         add(OffsetT());
     }
 
+    private static TemplateResolver InputIteratorT()
+    {
+        return byReplacement().template("InputIteratorT")
+                              .addReplacements(POINTER_TYPES)
+                              .build();
+    }
+
+    private static TemplateResolver OutputIteratorT()
+    {
+        return byReplacement().template("OutputIteratorT")
+                              .addReplacements(POINTER_TYPES)
+                              .build();
+    }
+
+    private static TemplateResolver channels()
+    {
+        TemplateResolverAggregator.Builder builder = new TemplateResolverAggregator.Builder();
+
+        return builder.addAggregates(NUM_ACTIVE_CHANNELS())
+                      .addAggregates(NUM_CHANNELS())
+                      .methodName(new PrefixSuffix.Builder().addSuffix(CHANNEL_SUFFIX)
+                                                            .build())
+                      .build();
+    }
+
     private static TemplateResolver OffsetT()
     {
         return byReplacement().template("OffsetT")
-                              .addReplacements("int")
+                              .addReplacements(OFFSET_TYPES)
                               .build();
     }
 
@@ -86,24 +122,24 @@ public class CubTemplates
     private static TemplateResolver NUM_CHANNELS()
     {
         return byReplacement().template("NUM_CHANNELS")
-                              .addReplacements("1", "2", "3", "4")
+                              .addReplacements(CHANNEL_VALUES)
                               .build();
     }
 
     private static TemplateResolver NUM_ACTIVE_CHANNELS()
     {
         return byReplacement().template("NUM_ACTIVE_CHANNELS")
-                              .addReplacements("1", "2", "3", "4")
+                              .addReplacements(CHANNEL_VALUES)
                               .build();
     }
 
-    public Iterable<String> walk(String definition)
+    public Iterable<Result> walk(String definition, String functionName)
     {
         List<TemplateResolver> temp = templates.stream()
                                                .filter(tr -> tr.isApplicable(definition))
                                                .collect(Collectors.toList());
 
-        return () -> new MultiListIndexIterator(definition, temp);
+        return () -> new MultiListIndexIterator(definition, functionName, temp);
     }
 
     private void add(TemplateResolver resolver)

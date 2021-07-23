@@ -5,11 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.CharStream;
@@ -102,7 +100,7 @@ public class MethodPrinter
 
         private void print()
         {
-            Set<String> uniqueDefinitions = new HashSet<>();
+            Map<String, String> uniqueDefinitions = new LinkedHashMap<>();
 
             for (FunctionDefinition function : this.functions)
             {
@@ -127,17 +125,17 @@ public class MethodPrinter
                                        .map(s -> "<" + s + ">")
                                        .orElse(""));
 
-                uniqueDefinitions.add(builder.toString());
+                uniqueDefinitions.put(builder.toString(), function.name());
             }
 
             CubTemplates templates = new CubTemplates();
 
-            uniqueDefinitions.forEach(definition ->
+            uniqueDefinitions.forEach((definition, function) ->
             {
                 System.out.println();
                 System.out.println("// " + definition);
 
-                templates.walk(definition)
+                templates.walk(definition, function)
                          .forEach(System.out::println);
             });
         }
