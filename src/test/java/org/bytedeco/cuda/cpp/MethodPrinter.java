@@ -1,5 +1,6 @@
 package org.bytedeco.cuda.cpp;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -169,8 +170,12 @@ public class MethodPrinter
 
         collectors.forEach((cuh, collector) ->
         {
+            Path relativePath = includeDir.relativize(cuh);
+            String headerDef = relativePath.toString()
+                                           .replace(File.separatorChar, '/');
+
             System.out.println();
-            System.out.println("\"<" + includeDir.relativize(cuh) + ">\"");
+            System.out.println("\"<" + headerDef + ">\"");
             collector.print();
         });
     }
