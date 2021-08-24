@@ -20,17 +20,17 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.immersed.gaffe.CPP14Lexer;
-import org.immersed.gaffe.CPP14Parser;
-import org.immersed.gaffe.CPP14Parser.ClassHeadNameContext;
-import org.immersed.gaffe.CPP14Parser.DeclaratorContext;
-import org.immersed.gaffe.CPP14Parser.FunctionDefinitionContext;
-import org.immersed.gaffe.CPP14Parser.NamespaceDefinitionContext;
-import org.immersed.gaffe.CPP14Parser.ParameterDeclarationContext;
-import org.immersed.gaffe.CPP14Parser.TemplateParameterContext;
-import org.immersed.gaffe.CPP14Parser.TemplateparameterListContext;
-import org.immersed.gaffe.CPP14Parser.TypeParameterContext;
-import org.immersed.gaffe.CPP14ParserBaseListener;
+import org.bytedeco.grammars.CPP14Lexer;
+import org.bytedeco.grammars.CPP14Parser;
+import org.bytedeco.grammars.CPP14ParserBaseListener;
+import org.bytedeco.grammars.CPP14Parser.ClassHeadNameContext;
+import org.bytedeco.grammars.CPP14Parser.DeclaratorContext;
+import org.bytedeco.grammars.CPP14Parser.FunctionDefinitionContext;
+import org.bytedeco.grammars.CPP14Parser.NamespaceDefinitionContext;
+import org.bytedeco.grammars.CPP14Parser.ParameterDeclarationContext;
+import org.bytedeco.grammars.CPP14Parser.TemplateParameterContext;
+import org.bytedeco.grammars.CPP14Parser.TemplateparameterListContext;
+import org.bytedeco.grammars.CPP14Parser.TypeParameterContext;
 
 public class MethodPrinter
 {

@@ -52,8 +52,8 @@ dependencies {
 }
 
 generateGrammarSource {
-	outputDirectory = file("build/generated-src/antlr/main/org/immersed/gaffe")
-    arguments += ["-package", "org.immersed.gaffe"]
+	outputDirectory = file("build/generated-src/antlr/main/org/bytedeco/grammars")
+    arguments += ["-package", "org.bytedeco.grammars"]
 }
 
 
