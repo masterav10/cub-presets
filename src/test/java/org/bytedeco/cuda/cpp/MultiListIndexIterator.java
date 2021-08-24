@@ -20,32 +20,50 @@ public class MultiListIndexIterator implements Iterator<Result>
     {
         private final String newDefinition;
         private final String newFunctionName;
+        private final int templatesRemaining;
 
-        public Result(String newDefinition, String newFunctionName)
+        public Result(String newDefinition, String newFunctionName, int templatesRemaining)
         {
             this.newDefinition = newDefinition;
             this.newFunctionName = newFunctionName;
+            this.templatesRemaining = templatesRemaining;
         }
 
         @Override
         public String toString()
         {
-            return String.format("infoMap.put(new Info(\"%s\").javaNames(\"%s\"));", newDefinition, newFunctionName);
+            StringBuilder builder = new StringBuilder();
+
+            if (templatesRemaining > 0)
+            {
+                builder.append("// ");
+            }
+
+            builder.append("infoMap.put(new Info(")
+                   .append('"')
+                   .append(newDefinition)
+                   .append('"')
+                   .append(").javaNames(")
+                   .append('"')
+                   .append(newFunctionName)
+                   .append('"')
+                   .append("));");
+
+            return builder.toString();
         }
     }
 
     private final List<TemplateResolver> resolvers;
-    private final String functionName;
-    private final String definition;
+
+    private final FunctionDefinition definition;
     private final int[] indexes;
 
     private final int total;
     private int count;
 
-    public MultiListIndexIterator(String definition, String functionName, List<TemplateResolver> resolvers)
+    public MultiListIndexIterator(FunctionDefinition definition, List<TemplateResolver> resolvers)
     {
         this.definition = definition;
-        this.functionName = functionName;
         this.resolvers = new ArrayList<>(resolvers);
 
         this.indexes = new int[this.resolvers.size()];
@@ -57,9 +75,9 @@ public class MultiListIndexIterator implements Iterator<Result>
         this.count = 0;
     }
 
-    public MultiListIndexIterator(String definition, String functionName, TemplateResolver... remaining)
+    public MultiListIndexIterator(FunctionDefinition definition, TemplateResolver... remaining)
     {
-        this(definition, functionName, Arrays.asList(remaining));
+        this(definition, Arrays.asList(remaining));
     }
 
     public boolean hasNext()
@@ -69,15 +87,24 @@ public class MultiListIndexIterator implements Iterator<Result>
 
     public Result next()
     {
-        String newDefinition = definition;
-        String newMethodName = functionName;
+        String newDefinition = definition.toDefinition();
+        String newMethodName = definition.name();
+
+        int templatesRemaining = definition.templates()
+                                           .size();
 
         for (int i = 0; i < resolvers.size(); i++)
         {
             int index = this.indexes[i];
             TemplateResolver resolver = this.resolvers.get(i);
 
+            final String prevDefinition = newDefinition;
             newDefinition = resolver.resolve(index, newDefinition);
+
+            if (!prevDefinition.equals(newDefinition))
+            {
+                templatesRemaining = templatesRemaining - resolver.count();
+            }
 
             Optional<TemplateResolver> optional = resolver.methodName();
 
@@ -91,7 +118,7 @@ public class MultiListIndexIterator implements Iterator<Result>
         adjustIndexArray(0);
         this.count++;
 
-        return new Result(newDefinition, newMethodName);
+        return new Result(newDefinition, newMethodName, templatesRemaining);
     }
 
     private void adjustIndexArray(int index)

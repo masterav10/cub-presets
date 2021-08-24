@@ -16,6 +16,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.immersed.gaffe.CPP14Lexer;
 import org.immersed.gaffe.CPP14Parser;
@@ -31,25 +32,35 @@ import org.immersed.gaffe.CPP14ParserBaseListener;
 
 public class MethodPrinter
 {
-    private static final class Cpp14Listener extends CPP14ParserBaseListener
+    private static final class Cpp14DefinitionListener extends CPP14ParserBaseListener
     {
-        private String struct;
-        private String namespace;
-
-        private FunctionDefinition.Builder builder = new FunctionDefinition.Builder();
-        private List<FunctionDefinition> functions = new ArrayList<>();
+        private final FunctionDefinition.Builder builder = new FunctionDefinition.Builder();
 
         @Override
         public void exitNamespaceDefinition(NamespaceDefinitionContext ctx)
         {
             TerminalNode id = ctx.Identifier();
-            this.namespace = id.getText();
+            this.builder.namespace(id.getText());
         }
 
         @Override
         public void exitClassHeadName(ClassHeadNameContext ctx)
         {
-            this.struct = ctx.getText();
+            this.builder.struct(ctx.getText());
+        }
+    }
+
+    private static final class Cpp14Listener extends CPP14ParserBaseListener
+    {
+        private List<FunctionDefinition> functions = new ArrayList<>();
+
+        private final FunctionDefinition.Builder base;
+        private final FunctionDefinition.Builder builder;
+
+        public Cpp14Listener(Cpp14DefinitionListener structAndNamespaces)
+        {
+            this.base = structAndNamespaces.builder;
+            this.builder = new FunctionDefinition.Builder().mergeFrom(this.base);
         }
 
         @Override
@@ -67,7 +78,8 @@ public class MethodPrinter
             this.builder.name(methodName.getText());
             this.functions.add(this.builder.build());
 
-            this.builder.clear();
+            this.builder.clear()
+                        .mergeFrom(this.base);
 
         }
 
@@ -101,44 +113,18 @@ public class MethodPrinter
 
         private void print()
         {
-            Map<String, String> uniqueDefinitions = new LinkedHashMap<>();
-
-            for (FunctionDefinition function : this.functions)
-            {
-                StringBuilder builder = new StringBuilder();
-
-                if (namespace != null)
-                {
-                    builder.append(namespace)
-                           .append("::");
-                }
-
-                if (struct != null)
-                {
-                    builder.append(struct)
-                           .append("::");
-                }
-
-                builder.append(function.name());
-                builder.append(function.templates()
-                                       .stream()
-                                       .reduce((a, b) -> a + "," + b)
-                                       .map(s -> "<" + s + ">")
-                                       .orElse(""));
-
-                uniqueDefinitions.put(builder.toString(), function.name());
-            }
-
             CubTemplates templates = new CubTemplates();
 
-            uniqueDefinitions.forEach((definition, function) ->
+            for (FunctionDefinition functionObj : this.functions)
             {
+                final String definition = functionObj.toDefinition();
+
                 System.out.println();
                 System.out.println("// " + definition);
 
-                templates.walk(definition, function)
+                templates.walk(functionObj)
                          .forEach(System.out::println);
-            });
+            }
         }
     }
 
@@ -157,13 +143,8 @@ public class MethodPrinter
 
         for (Path deviceCuh : allFiles)
         {
-            CharStream stream = CharStreams.fromPath(deviceCuh);
-            Lexer lexer = new CPP14Lexer(stream);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            CPP14Parser parser = new CPP14Parser(tokens);
-            Cpp14Listener listener = new Cpp14Listener();
-            parser.addParseListener(listener);
-            parser.translationUnit();
+            Cpp14DefinitionListener structAndNamespace = parse(deviceCuh, new Cpp14DefinitionListener());
+            Cpp14Listener listener = parse(deviceCuh, new Cpp14Listener(structAndNamespace));
 
             collectors.put(deviceCuh, listener);
         }
@@ -178,5 +159,18 @@ public class MethodPrinter
             System.out.println("\"<" + headerDef + ">\"");
             collector.print();
         });
+    }
+
+    private static final <T extends ParseTreeListener> T parse(Path path, T listener) throws IOException
+    {
+        CharStream stream = CharStreams.fromPath(path);
+        Lexer lexer = new CPP14Lexer(stream);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CPP14Parser parser = new CPP14Parser(tokens);
+
+        parser.addParseListener(listener);
+        parser.translationUnit();
+
+        return listener;
     }
 }

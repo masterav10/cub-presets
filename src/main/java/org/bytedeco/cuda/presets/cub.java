@@ -17,6 +17,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                 include = {
                     "<cub/device/device_histogram.cuh>",
                     "<cub/device/device_scan.cuh>",
+                    "<cub/device/device_partition.cuh>"
                 }
             )
         }
@@ -27,7 +28,7 @@ public class cub implements InfoMapper
 {
     @Override
     public void map(InfoMap infoMap)
-    {
+    {        
         infoMap.put(new Info("CUB_NS_PREFIX", "CUB_RUNTIME_FUNCTION").cppTypes().annotations());
         
         // cub::DeviceHistogram::HistogramEven<SampleIteratorT,CounterT,LevelT,OffsetT>
@@ -58,6 +59,14 @@ public class cub implements InfoMapper
         infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramRange<3,3,int*,unsigned int,int,int>").javaNames("MultiHistogramRange3Channel"));
         infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramRange<4,4,int*,unsigned int,int,int>").javaNames("MultiHistogramRange4Channel"));
 
+        // cub::DevicePartition::Flagged<InputIteratorT,FlagIterator,OutputIteratorT,NumSelectedIteratorT>
+        infoMap.put(new Info("cub::DevicePartition::Flagged<float*,char*,float*,int*>").javaNames("Flagged"));
+        infoMap.put(new Info("cub::DevicePartition::Flagged<int*,char*,int*,int*>").javaNames("Flagged"));
+
+        // cub::DevicePartition::If<InputIteratorT,OutputIteratorT,NumSelectedIteratorT,SelectOp>
+        // infoMap.put(new Info("cub::DevicePartition::If<float*,float*,int*,SelectOp>").javaNames("If"));
+        // infoMap.put(new Info("cub::DevicePartition::If<int*,int*,int*,SelectOp>").javaNames("If"));
+        
         
         infoMap.put(new Info("cub::DeviceScan::ExclusiveSum<int*,int*>").javaNames("ExclusiveSum"));
         infoMap.put(new Info("cub::DeviceScan::InclusiveSum<int*,int*>").javaNames("InclusiveSum"));

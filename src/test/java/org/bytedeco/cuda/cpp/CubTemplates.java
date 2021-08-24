@@ -2,9 +2,12 @@ package org.bytedeco.cuda.cpp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.assertj.core.internal.Iterables;
+import org.assertj.core.internal.Iterators;
 import org.bytedeco.cuda.cpp.MultiListIndexIterator.Result;
 
 public class CubTemplates
@@ -20,7 +23,7 @@ public class CubTemplates
     static
     {
         VALUE_TYPES = new String[]
-        { "float", "int"};
+        { "float", "int" };
 
         POINTER_TYPES = new String[VALUE_TYPES.length];
         Arrays.setAll(POINTER_TYPES, i -> VALUE_TYPES[i] + "*");
@@ -64,12 +67,28 @@ public class CubTemplates
 
         add(CounterT());
         add(OffsetT());
+        add(FlagIterator());
+        add(NumSelectedIteratorT());
+    }
+
+    private static TemplateResolver NumSelectedIteratorT()
+    {
+        return byReplacement().template("NumSelectedIteratorT")
+                              .addReplacements("int*")
+                              .build();
     }
 
     private static TemplateResolver InputIteratorT()
     {
         return byReplacement().template("InputIteratorT")
                               .addReplacements(POINTER_TYPES)
+                              .build();
+    }
+
+    private static TemplateResolver FlagIterator()
+    {
+        return byReplacement().template("FlagIterator")
+                              .addReplacements("char*")
                               .build();
     }
 
@@ -133,13 +152,15 @@ public class CubTemplates
                               .build();
     }
 
-    public Iterable<Result> walk(String definition, String functionName)
+    public Iterable<Result> walk(FunctionDefinition function)
     {
+        final String definition = function.toDefinition();
+
         List<TemplateResolver> temp = templates.stream()
                                                .filter(tr -> tr.isApplicable(definition))
                                                .collect(Collectors.toList());
 
-        return () -> new MultiListIndexIterator(definition, functionName, temp);
+        return () -> new MultiListIndexIterator(function, temp);
     }
 
     private void add(TemplateResolver resolver)
