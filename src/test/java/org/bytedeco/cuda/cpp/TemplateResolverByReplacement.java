@@ -18,7 +18,21 @@ public interface TemplateResolverByReplacement extends TemplateResolver
     @Override
     default boolean isApplicable(String definition)
     {
-        return definition.contains(template());
+        int start = definition.indexOf('<') + 1;
+        int end = definition.indexOf('>');
+
+        String[] templates = definition.substring(start, end)
+                                       .split(",");
+
+        for (String template : templates)
+        {
+            if (template.equals(template()))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

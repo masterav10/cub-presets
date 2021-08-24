@@ -62,18 +62,51 @@ public class CubTemplates
         add(aggregate(SampleIteratorT(), LevelT()));
         add(aggregate(InputIteratorT(), OutputIteratorT()));
         add(aggregate(KeyT(), ValueT()));
+        add(aggregate(InputIteratorT(), UniqueOutputIteratorT()));
 
         add(CounterT());
         add(OffsetT());
         add(FlagIterator());
         add(NumSelectedIteratorT());
         add(KeyT());
+        add(LengthsOutputIteratorT());
+        add(NumRunsOutputIteratorT());
+        add(InputIteratorT());
+        add(OffsetsOutputIteratorT());
+    }
+
+    private TemplateResolver OffsetsOutputIteratorT()
+    {
+        return byReplacement().template("OffsetsOutputIteratorT")
+                              .addReplacements(COUNTER_TYPES)
+                              .build();
+    }
+
+    private TemplateResolver NumRunsOutputIteratorT()
+    {
+        return byReplacement().template("NumRunsOutputIteratorT")
+                              .addReplacements(COUNTER_TYPES)
+                              .build();
+    }
+
+    private TemplateResolver LengthsOutputIteratorT()
+    {
+        return byReplacement().template("LengthsOutputIteratorT")
+                              .addReplacements(COUNTER_TYPES)
+                              .build();
+    }
+
+    private TemplateResolver UniqueOutputIteratorT()
+    {
+        return byReplacement().template("UniqueOutputIteratorT")
+                              .addReplacements(POINTER_TYPES)
+                              .build();
     }
 
     private TemplateResolver ValueT()
     {
         return byReplacement().template("ValueT")
-                              .addReplacements(VALUE_TYPES)
+                              .addReplacements(POINTER_TYPES)
                               .build();
     }
 
@@ -169,24 +202,9 @@ public class CubTemplates
     {
         final String definition = function.toDefinition();
 
-        List<TemplateResolver> temp = new ArrayList<>();
-
-        int remaining = function.templates()
-                                .size();
-
-        for (TemplateResolver resolver : templates)
-        {
-            if (resolver.isApplicable(definition))
-            {
-                temp.add(resolver);
-                remaining = remaining - resolver.count();
-            }
-
-            if (remaining == 0)
-            {
-                break;
-            }
-        }
+        List<TemplateResolver> temp = this.templates.stream()
+                                                    .filter(t -> t.isApplicable(definition))
+                                                    .collect(Collectors.toList());
 
         return () -> new MultiListIndexIterator(function, temp);
     }

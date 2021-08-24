@@ -129,10 +129,15 @@ public class MethodPrinter
                 final String definition = functionObj.toDefinition();
 
                 System.out.println();
-                System.out.println("// " + definition);
+                System.out.format("    // %s", definition);
+                System.out.println();
 
                 templates.walk(functionObj)
-                         .forEach(System.out::println);
+                         .forEach(result ->
+                         {
+                             System.out.format("    %s", result);
+                             System.out.println();
+                         });
             }
         }
     }
@@ -143,9 +148,15 @@ public class MethodPrinter
         Path path = includeDir.resolve("cub")
                               .resolve("device");
 
+        //final String suffix = ".cuh";
+        final String suffix = "device_partition.cuh";
+
         List<Path> allFiles = Files.walk(path, 1)
-                                   .filter(p -> p.toString()
-                                                 .endsWith(".cuh"))
+                                   .filter(p ->
+                                   {
+                                       String name = p.toString();
+                                       return name.endsWith(suffix);
+                                   })
                                    .collect(Collectors.toList());
 
         Map<Path, Cpp14Listener> collectors = new LinkedHashMap<>();
@@ -166,7 +177,17 @@ public class MethodPrinter
 
             System.out.println();
             System.out.println("\"<" + headerDef + ">\"");
+            System.out.println();
+            
+            String name = cuh.getFileName()
+                             .toString();
+            String method = name.substring(0, name.lastIndexOf('.'));
+
+            System.out.format("private static void %s(InfoMap infoMap)", method)
+                      .println();
+            System.out.print("{");
             collector.print();
+            System.out.println("}");
         });
     }
 

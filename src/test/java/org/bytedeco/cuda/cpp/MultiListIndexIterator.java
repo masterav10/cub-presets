@@ -20,13 +20,13 @@ public class MultiListIndexIterator implements Iterator<Result>
     {
         private final String newDefinition;
         private final String newFunctionName;
-        private final int templatesRemaining;
+        private final FunctionDefinition definition;
 
-        public Result(String newDefinition, String newFunctionName, int templatesRemaining)
+        public Result(String newDefinition, String newFunctionName, FunctionDefinition definition)
         {
             this.newDefinition = newDefinition;
             this.newFunctionName = newFunctionName;
-            this.templatesRemaining = templatesRemaining;
+            this.definition = definition;
         }
 
         @Override
@@ -34,7 +34,9 @@ public class MultiListIndexIterator implements Iterator<Result>
         {
             StringBuilder builder = new StringBuilder();
 
-            if (templatesRemaining > 0)
+            if (this.definition.templates()
+                               .stream()
+                               .anyMatch(template -> newDefinition.contains(template)))
             {
                 builder.append("// ");
             }
@@ -90,21 +92,12 @@ public class MultiListIndexIterator implements Iterator<Result>
         String newDefinition = definition.toDefinition();
         String newMethodName = definition.name();
 
-        int templatesRemaining = definition.templates()
-                                           .size();
-
         for (int i = 0; i < resolvers.size(); i++)
         {
             int index = this.indexes[i];
             TemplateResolver resolver = this.resolvers.get(i);
 
-            final String prevDefinition = newDefinition;
             newDefinition = resolver.resolve(index, newDefinition);
-
-            if (!prevDefinition.equals(newDefinition))
-            {
-                templatesRemaining = templatesRemaining - resolver.count();
-            }
 
             Optional<TemplateResolver> optional = resolver.methodName();
 
@@ -118,7 +111,7 @@ public class MultiListIndexIterator implements Iterator<Result>
         adjustIndexArray(0);
         this.count++;
 
-        return new Result(newDefinition, newMethodName, templatesRemaining);
+        return new Result(newDefinition, newMethodName, definition);
     }
 
     private void adjustIndexArray(int index)
