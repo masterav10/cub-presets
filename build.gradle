@@ -56,7 +56,6 @@ generateTestGrammarSource {
     arguments += ["-package", "org.bytedeco.grammars"]
 }
 
-
 task javacppGenerate(type: JavaExec, dependsOn: [compileJava]) {
 	def outputDir = "${buildDir}/javacpp/java"
 	
