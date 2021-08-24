@@ -77,6 +77,7 @@ public class CubTemplates
         add(InputIteratorT());
         add(OffsetsOutputIteratorT());
         add(OffsetIteratorT());
+        add(ValueT());
     }
 
     private static TemplateResolver OffsetIteratorT()
