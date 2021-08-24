@@ -51,13 +51,13 @@ dependencies {
 	testImplementation 'org.mockito:mockito-core'
 }
 
-generateGrammarSource {
+generateTestGrammarSource {
 	outputDirectory = file("build/generated-src/antlr/main/org/bytedeco/grammars")
     arguments += ["-package", "org.bytedeco.grammars"]
 }
 
 
-task javacppGenerate(type: JavaExec, dependsOn: [compileJava, generateGrammarSource]) {
+task javacppGenerate(type: JavaExec, dependsOn: [compileJava]) {
 	def outputDir = "${buildDir}/javacpp/java"
 	
 	inputs.dir(sourceSets.main.java.outputDir)
@@ -113,6 +113,12 @@ task jniJavacpp(type: JavaExec, dependsOn: compileJavacppJava) {
 }
 
 task generateAll(dependsOn: jniJavacpp)
+
+jar.dependsOn generateAll
+
+jar {
+	from sourceSets.javacpp.java
+}
 
 test {
 	useJUnitPlatform()
