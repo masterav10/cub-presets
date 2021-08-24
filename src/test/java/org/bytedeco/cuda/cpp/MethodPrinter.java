@@ -6,9 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.CharStream;
@@ -53,6 +55,7 @@ public class MethodPrinter
     private static final class Cpp14Listener extends CPP14ParserBaseListener
     {
         private List<FunctionDefinition> functions = new ArrayList<>();
+        private Set<String> definitions = new HashSet<>();
 
         private final FunctionDefinition.Builder base;
         private final FunctionDefinition.Builder builder;
@@ -76,7 +79,13 @@ public class MethodPrinter
             }
 
             this.builder.name(methodName.getText());
-            this.functions.add(this.builder.build());
+
+            FunctionDefinition function = this.builder.build();
+
+            if (this.definitions.add(function.toDefinition()))
+            {
+                this.functions.add(function);
+            }
 
             this.builder.clear()
                         .mergeFrom(this.base);

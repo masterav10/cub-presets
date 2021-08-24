@@ -17,7 +17,8 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                 include = {
                     "<cub/device/device_histogram.cuh>",
                     "<cub/device/device_scan.cuh>",
-                    "<cub/device/device_partition.cuh>"
+                    "<cub/device/device_partition.cuh>",
+                    "<cub/device/device_radix_sort.cuh>"
                 }
             )
         }
@@ -30,6 +31,7 @@ public class cub implements InfoMapper
     public void map(InfoMap infoMap)
     {        
         infoMap.put(new Info("CUB_NS_PREFIX", "CUB_RUNTIME_FUNCTION").cppTypes().annotations());
+        infoMap.put(new Info("DoubleBuffer").skip());
         
         // cub::DeviceHistogram::HistogramEven<SampleIteratorT,CounterT,LevelT,OffsetT>
         infoMap.put(new Info("cub::DeviceHistogram::HistogramEven<float*,unsigned int,float,int>").javaNames("HistogramEven"));
@@ -67,7 +69,23 @@ public class cub implements InfoMapper
         // infoMap.put(new Info("cub::DevicePartition::If<float*,float*,int*,SelectOp>").javaNames("If"));
         // infoMap.put(new Info("cub::DevicePartition::If<int*,int*,int*,SelectOp>").javaNames("If"));
         
+        // cub::DeviceRadixSort::SortPairs<KeyT,ValueT>
+        infoMap.put(new Info("cub::DeviceRadixSort::SortPairs<float,float>").javaNames("SortPairs"));
+        infoMap.put(new Info("cub::DeviceRadixSort::SortPairs<int,int>").javaNames("SortPairs"));
+
+        // cub::DeviceRadixSort::SortPairsDescending<KeyT,ValueT>
+        infoMap.put(new Info("cub::DeviceRadixSort::SortPairsDescending<float,float>").javaNames("SortPairsDescending"));
+        infoMap.put(new Info("cub::DeviceRadixSort::SortPairsDescending<int,int>").javaNames("SortPairsDescending"));
+
+        // cub::DeviceRadixSort::SortKeys<KeyT>
+        infoMap.put(new Info("cub::DeviceRadixSort::SortKeys<float>").javaNames("SortKeys"));
+        infoMap.put(new Info("cub::DeviceRadixSort::SortKeys<int>").javaNames("SortKeys"));
+
+        // cub::DeviceRadixSort::SortKeysDescending<KeyT>
+        infoMap.put(new Info("cub::DeviceRadixSort::SortKeysDescending<float>").javaNames("SortKeysDescending"));
+        infoMap.put(new Info("cub::DeviceRadixSort::SortKeysDescending<int>").javaNames("SortKeysDescending"));
         
+      
         infoMap.put(new Info("cub::DeviceScan::ExclusiveSum<int*,int*>").javaNames("ExclusiveSum"));
         infoMap.put(new Info("cub::DeviceScan::InclusiveSum<int*,int*>").javaNames("InclusiveSum"));
     }

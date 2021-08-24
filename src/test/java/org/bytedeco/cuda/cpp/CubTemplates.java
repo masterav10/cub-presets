@@ -2,12 +2,9 @@ package org.bytedeco.cuda.cpp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.assertj.core.internal.Iterables;
-import org.assertj.core.internal.Iterators;
 import org.bytedeco.cuda.cpp.MultiListIndexIterator.Result;
 
 public class CubTemplates
@@ -64,11 +61,27 @@ public class CubTemplates
         add(channels());
         add(aggregate(SampleIteratorT(), LevelT()));
         add(aggregate(InputIteratorT(), OutputIteratorT()));
+        add(aggregate(KeyT(), ValueT()));
 
         add(CounterT());
         add(OffsetT());
         add(FlagIterator());
         add(NumSelectedIteratorT());
+        add(KeyT());
+    }
+
+    private TemplateResolver ValueT()
+    {
+        return byReplacement().template("ValueT")
+                              .addReplacements(VALUE_TYPES)
+                              .build();
+    }
+
+    private TemplateResolver KeyT()
+    {
+        return byReplacement().template("KeyT")
+                              .addReplacements(VALUE_TYPES)
+                              .build();
     }
 
     private static TemplateResolver NumSelectedIteratorT()
@@ -156,9 +169,24 @@ public class CubTemplates
     {
         final String definition = function.toDefinition();
 
-        List<TemplateResolver> temp = templates.stream()
-                                               .filter(tr -> tr.isApplicable(definition))
-                                               .collect(Collectors.toList());
+        List<TemplateResolver> temp = new ArrayList<>();
+
+        int remaining = function.templates()
+                                .size();
+
+        for (TemplateResolver resolver : templates)
+        {
+            if (resolver.isApplicable(definition))
+            {
+                temp.add(resolver);
+                remaining = remaining - resolver.count();
+            }
+
+            if (remaining == 0)
+            {
+                break;
+            }
+        }
 
         return () -> new MultiListIndexIterator(function, temp);
     }
