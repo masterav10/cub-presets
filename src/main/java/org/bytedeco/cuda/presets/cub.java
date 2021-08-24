@@ -17,11 +17,11 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             @Platform(
                 include = {
                     "<cub/device/device_histogram.cuh>",
-                    "<cub/device/device_scan.cuh>",
                     "<cub/device/device_partition.cuh>",
                     "<cub/device/device_radix_sort.cuh>",
                     "<cub/device/device_reduce.cuh>",
-                    "<cub/device/device_run_length_encode.cuh>"
+                    "<cub/device/device_run_length_encode.cuh>",
+                    "<cub/device/device_scan.cuh>"
                 }
             )
         }
@@ -34,16 +34,14 @@ public class cub implements InfoMapper
     public void map(InfoMap infoMap)
     {        
         infoMap.put(new Info("CUB_NS_PREFIX", "CUB_RUNTIME_FUNCTION").cppTypes().annotations());
-        infoMap.put(new Info("DoubleBuffer", "ArgMax", "ArgMin").skip());
+        infoMap.put(new Info("DoubleBuffer").skip());
         
         device_histogram(infoMap);
         device_partition(infoMap);
         device_radix_sort(infoMap);
         device_reduce(infoMap);
         device_run_length_encode(infoMap);
-        
-        infoMap.put(new Info("cub::DeviceScan::ExclusiveSum<int*,int*>").javaNames("ExclusiveSum"));
-        infoMap.put(new Info("cub::DeviceScan::InclusiveSum<int*,int*>").javaNames("InclusiveSum"));
+        device_scan(infoMap);
     }
     
     private static void device_histogram(InfoMap infoMap)
@@ -148,4 +146,22 @@ public class cub implements InfoMapper
         infoMap.put(new Info("cub::DeviceRunLengthEncode::NonTrivialRuns<int*,unsigned int*,unsigned int*,unsigned int*>").javaNames("NonTrivialRuns"));
     }
 
+    private static void device_scan(InfoMap infoMap)
+    {
+        // cub::DeviceScan::ExclusiveSum<InputIteratorT,OutputIteratorT>
+        infoMap.put(new Info("cub::DeviceScan::ExclusiveSum<float*,float*>").javaNames("ExclusiveSum"));
+        infoMap.put(new Info("cub::DeviceScan::ExclusiveSum<int*,int*>").javaNames("ExclusiveSum"));
+
+        // cub::DeviceScan::ExclusiveScan<InputIteratorT,OutputIteratorT,ScanOpT,InitValueT>
+        // infoMap.put(new Info("cub::DeviceScan::ExclusiveScan<float*,float*,ScanOpT,InitValueT>").javaNames("ExclusiveScan"));
+        // infoMap.put(new Info("cub::DeviceScan::ExclusiveScan<int*,int*,ScanOpT,InitValueT>").javaNames("ExclusiveScan"));
+
+        // cub::DeviceScan::InclusiveSum<InputIteratorT,OutputIteratorT>
+        infoMap.put(new Info("cub::DeviceScan::InclusiveSum<float*,float*>").javaNames("InclusiveSum"));
+        infoMap.put(new Info("cub::DeviceScan::InclusiveSum<int*,int*>").javaNames("InclusiveSum"));
+
+        // cub::DeviceScan::InclusiveScan<InputIteratorT,OutputIteratorT,ScanOpT>
+        // infoMap.put(new Info("cub::DeviceScan::InclusiveScan<float*,float*,ScanOpT>").javaNames("InclusiveScan"));
+        // infoMap.put(new Info("cub::DeviceScan::InclusiveScan<int*,int*,ScanOpT>").javaNames("InclusiveScan"));
+    }
 }

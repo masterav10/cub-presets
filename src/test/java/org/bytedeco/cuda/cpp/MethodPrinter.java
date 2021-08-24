@@ -149,7 +149,7 @@ public class MethodPrinter
                               .resolve("device");
 
         // final String suffix = ".cuh";
-        final String suffix = "device_run_length_encode.cuh";
+        final String suffix = "device_scan.cuh";
 
         List<Path> allFiles = Files.walk(path, 1)
                                    .filter(p ->
