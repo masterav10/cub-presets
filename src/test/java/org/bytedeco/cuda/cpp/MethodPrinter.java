@@ -149,7 +149,7 @@ public class MethodPrinter
                               .resolve("device");
 
         // final String suffix = ".cuh";
-        final String suffix = "device_scan.cuh";
+        final String suffix = "device_segmented_radix_sort.cuh";
 
         List<Path> allFiles = Files.walk(path, 1)
                                    .filter(p ->

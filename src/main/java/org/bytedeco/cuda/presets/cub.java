@@ -21,13 +21,14 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                     "<cub/device/device_radix_sort.cuh>",
                     "<cub/device/device_reduce.cuh>",
                     "<cub/device/device_run_length_encode.cuh>",
-                    "<cub/device/device_scan.cuh>"
+                    "<cub/device/device_scan.cuh>",
+                    "<cub/device/device_segmented_radix_sort.cuh>"
                 }
             )
         }
 )
 @NoException
-@SuppressWarnings("java:S101")
+@SuppressWarnings({"java:S100", "java:S101"})
 public class cub implements InfoMapper
 {
     @Override
@@ -42,6 +43,7 @@ public class cub implements InfoMapper
         device_reduce(infoMap);
         device_run_length_encode(infoMap);
         device_scan(infoMap);
+        device_segmented_radix_sort(infoMap);
     }
     
     private static void device_histogram(InfoMap infoMap)
@@ -163,5 +165,24 @@ public class cub implements InfoMapper
         // cub::DeviceScan::InclusiveScan<InputIteratorT,OutputIteratorT,ScanOpT>
         // infoMap.put(new Info("cub::DeviceScan::InclusiveScan<float*,float*,ScanOpT>").javaNames("InclusiveScan"));
         // infoMap.put(new Info("cub::DeviceScan::InclusiveScan<int*,int*,ScanOpT>").javaNames("InclusiveScan"));
+    }
+    
+    private static void device_segmented_radix_sort(InfoMap infoMap)
+    {
+        // cub::DeviceSegmentedRadixSort::SortPairs<KeyT,ValueT,OffsetIteratorT>
+        infoMap.put(new Info("cub::DeviceSegmentedRadixSort::SortPairs<float,float,unsigned int*>").javaNames("SortPairs"));
+        infoMap.put(new Info("cub::DeviceSegmentedRadixSort::SortPairs<int,int,unsigned int*>").javaNames("SortPairs"));
+
+        // cub::DeviceSegmentedRadixSort::SortPairsDescending<KeyT,ValueT,OffsetIteratorT>
+        infoMap.put(new Info("cub::DeviceSegmentedRadixSort::SortPairsDescending<float,float,unsigned int*>").javaNames("SortPairsDescending"));
+        infoMap.put(new Info("cub::DeviceSegmentedRadixSort::SortPairsDescending<int,int,unsigned int*>").javaNames("SortPairsDescending"));
+
+        // cub::DeviceSegmentedRadixSort::SortKeys<KeyT,OffsetIteratorT>
+        infoMap.put(new Info("cub::DeviceSegmentedRadixSort::SortKeys<float,unsigned int*>").javaNames("SortKeys"));
+        infoMap.put(new Info("cub::DeviceSegmentedRadixSort::SortKeys<int,unsigned int*>").javaNames("SortKeys"));
+
+        // cub::DeviceSegmentedRadixSort::SortKeysDescending<KeyT,OffsetIteratorT>
+        infoMap.put(new Info("cub::DeviceSegmentedRadixSort::SortKeysDescending<float,unsigned int*>").javaNames("SortKeysDescending"));
+        infoMap.put(new Info("cub::DeviceSegmentedRadixSort::SortKeysDescending<int,unsigned int*>").javaNames("SortKeysDescending"));
     }
 }

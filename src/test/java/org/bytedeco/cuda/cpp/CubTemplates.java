@@ -76,44 +76,52 @@ public class CubTemplates
         add(NumRunsOutputIteratorT());
         add(InputIteratorT());
         add(OffsetsOutputIteratorT());
+        add(OffsetIteratorT());
     }
 
-    private TemplateResolver OffsetsOutputIteratorT()
+    private static TemplateResolver OffsetIteratorT()
+    {
+        return byReplacement().template("OffsetIteratorT")
+                .addReplacements(asPointers(COUNTER_TYPES))
+                .build();
+    }
+
+    private static TemplateResolver OffsetsOutputIteratorT()
     {
         return byReplacement().template("OffsetsOutputIteratorT")
                               .addReplacements(asPointers(COUNTER_TYPES))
                               .build();
     }
 
-    private TemplateResolver NumRunsOutputIteratorT()
+    private static TemplateResolver NumRunsOutputIteratorT()
     {
         return byReplacement().template("NumRunsOutputIteratorT")
                               .addReplacements(asPointers(COUNTER_TYPES))
                               .build();
     }
 
-    private TemplateResolver LengthsOutputIteratorT()
+    private static TemplateResolver LengthsOutputIteratorT()
     {
         return byReplacement().template("LengthsOutputIteratorT")
                               .addReplacements(asPointers(COUNTER_TYPES))
                               .build();
     }
 
-    private TemplateResolver UniqueOutputIteratorT()
+    private static TemplateResolver UniqueOutputIteratorT()
     {
         return byReplacement().template("UniqueOutputIteratorT")
                               .addReplacements(asPointers(VALUE_TYPES))
                               .build();
     }
 
-    private TemplateResolver ValueT()
+    private static TemplateResolver ValueT()
     {
         return byReplacement().template("ValueT")
                               .addReplacements(VALUE_TYPES)
                               .build();
     }
 
-    private TemplateResolver KeyT()
+    private static TemplateResolver KeyT()
     {
         return byReplacement().template("KeyT")
                               .addReplacements(VALUE_TYPES)
