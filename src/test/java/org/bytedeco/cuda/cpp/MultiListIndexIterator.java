@@ -2,9 +2,13 @@ package org.bytedeco.cuda.cpp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 
 import org.bytedeco.cuda.cpp.MultiListIndexIterator.Result;
 
@@ -16,6 +20,8 @@ import org.bytedeco.cuda.cpp.MultiListIndexIterator.Result;
  */
 public class MultiListIndexIterator implements Iterator<Result>
 {
+    private static final Set<String> IGNORE_METHODS = new HashSet<>(Arrays.asList("ArgMin", "ArgMax"));
+
     public static final class Result
     {
         private final String newDefinition;
@@ -34,9 +40,11 @@ public class MultiListIndexIterator implements Iterator<Result>
         {
             StringBuilder builder = new StringBuilder();
 
-            if (this.definition.templates()
-                               .stream()
-                               .anyMatch(template -> newDefinition.contains(template)))
+            boolean anyTemplateUnresolved = this.definition.templates()
+                                                           .stream()
+                                                           .anyMatch(template -> newDefinition.contains(template));
+
+            if (anyTemplateUnresolved || IGNORE_METHODS.contains(newFunctionName))
             {
                 builder.append("// ");
             }
@@ -63,6 +71,8 @@ public class MultiListIndexIterator implements Iterator<Result>
     private final int total;
     private int count;
 
+    private final LinkedHashMap<String, String> uniqueDefinitions = new LinkedHashMap<>();
+
     public MultiListIndexIterator(FunctionDefinition definition, List<TemplateResolver> resolvers)
     {
         this.definition = definition;
@@ -84,32 +94,50 @@ public class MultiListIndexIterator implements Iterator<Result>
 
     public boolean hasNext()
     {
-        return count < total;
+        while (count < total)
+        {
+            String newDefinition = definition.toDefinition();
+            String newMethodName = definition.name();
+
+            for (int i = 0; i < resolvers.size(); i++)
+            {
+                int index = this.indexes[i];
+                TemplateResolver resolver = this.resolvers.get(i);
+
+                newDefinition = resolver.resolve(index, newDefinition);
+
+                Optional<TemplateResolver> optional = resolver.methodName();
+
+                if (optional.isPresent())
+                {
+                    TemplateResolver functionResolver = optional.get();
+                    newMethodName = functionResolver.resolve(index, newMethodName);
+                }
+            }
+
+            adjustIndexArray(0);
+            count++;
+
+            if (!this.uniqueDefinitions.containsKey(newDefinition))
+            {
+                this.uniqueDefinitions.put(newDefinition, newMethodName);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public Result next()
     {
-        String newDefinition = definition.toDefinition();
-        String newMethodName = definition.name();
+        String newDefinition = null;
+        String newMethodName = null;
 
-        for (int i = 0; i < resolvers.size(); i++)
+        for (Entry<String, String> entry : this.uniqueDefinitions.entrySet())
         {
-            int index = this.indexes[i];
-            TemplateResolver resolver = this.resolvers.get(i);
-
-            newDefinition = resolver.resolve(index, newDefinition);
-
-            Optional<TemplateResolver> optional = resolver.methodName();
-
-            if (optional.isPresent())
-            {
-                TemplateResolver functionResolver = optional.get();
-                newMethodName = functionResolver.resolve(index, newMethodName);
-            }
+            newDefinition = entry.getKey();
+            newMethodName = entry.getValue();
         }
-
-        adjustIndexArray(0);
-        this.count++;
 
         return new Result(newDefinition, newMethodName, definition);
     }

@@ -7,6 +7,7 @@ import org.bytedeco.javacpp.tools.Info;
 import org.bytedeco.javacpp.tools.InfoMap;
 import org.bytedeco.javacpp.tools.InfoMapper;
 
+//@formatter:off
 @Properties(
         inherit = cudart.class, 
         names = {"windows-x86_64"}, 
@@ -19,7 +20,8 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                     "<cub/device/device_scan.cuh>",
                     "<cub/device/device_partition.cuh>",
                     "<cub/device/device_radix_sort.cuh>",
-                    "<cub/device/device_reduce.cuh>"
+                    "<cub/device/device_reduce.cuh>",
+                    "<cub/device/device_run_length_encode.cuh>"
                 }
             )
         }
@@ -32,8 +34,20 @@ public class cub implements InfoMapper
     public void map(InfoMap infoMap)
     {        
         infoMap.put(new Info("CUB_NS_PREFIX", "CUB_RUNTIME_FUNCTION").cppTypes().annotations());
-        infoMap.put(new Info("DoubleBuffer").skip());
+        infoMap.put(new Info("DoubleBuffer", "ArgMax", "ArgMin").skip());
         
+        device_histogram(infoMap);
+        device_partition(infoMap);
+        device_radix_sort(infoMap);
+        device_reduce(infoMap);
+        device_run_length_encode(infoMap);
+        
+        infoMap.put(new Info("cub::DeviceScan::ExclusiveSum<int*,int*>").javaNames("ExclusiveSum"));
+        infoMap.put(new Info("cub::DeviceScan::InclusiveSum<int*,int*>").javaNames("InclusiveSum"));
+    }
+    
+    private static void device_histogram(InfoMap infoMap)
+    {
         // cub::DeviceHistogram::HistogramEven<SampleIteratorT,CounterT,LevelT,OffsetT>
         infoMap.put(new Info("cub::DeviceHistogram::HistogramEven<float*,unsigned int,float,int>").javaNames("HistogramEven"));
         infoMap.put(new Info("cub::DeviceHistogram::HistogramEven<int*,unsigned int,int,int>").javaNames("HistogramEven"));
@@ -61,7 +75,10 @@ public class cub implements InfoMapper
         infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramRange<2,2,int*,unsigned int,int,int>").javaNames("MultiHistogramRange2Channel"));
         infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramRange<3,3,int*,unsigned int,int,int>").javaNames("MultiHistogramRange3Channel"));
         infoMap.put(new Info("cub::DeviceHistogram::MultiHistogramRange<4,4,int*,unsigned int,int,int>").javaNames("MultiHistogramRange4Channel"));
-
+    }
+    
+    private static void device_partition(InfoMap infoMap)
+    {
         // cub::DevicePartition::Flagged<InputIteratorT,FlagIterator,OutputIteratorT,NumSelectedIteratorT>
         infoMap.put(new Info("cub::DevicePartition::Flagged<float*,char*,float*,int*>").javaNames("Flagged"));
         infoMap.put(new Info("cub::DevicePartition::Flagged<int*,char*,int*,int*>").javaNames("Flagged"));
@@ -69,7 +86,10 @@ public class cub implements InfoMapper
         // cub::DevicePartition::If<InputIteratorT,OutputIteratorT,NumSelectedIteratorT,SelectOp>
         // infoMap.put(new Info("cub::DevicePartition::If<float*,float*,int*,SelectOp>").javaNames("If"));
         // infoMap.put(new Info("cub::DevicePartition::If<int*,int*,int*,SelectOp>").javaNames("If"));
-        
+    }
+    
+    private static void device_radix_sort(InfoMap infoMap)
+    {
         // cub::DeviceRadixSort::SortPairs<KeyT,ValueT>
         infoMap.put(new Info("cub::DeviceRadixSort::SortPairs<float,float>").javaNames("SortPairs"));
         infoMap.put(new Info("cub::DeviceRadixSort::SortPairs<int,int>").javaNames("SortPairs"));
@@ -85,38 +105,47 @@ public class cub implements InfoMapper
         // cub::DeviceRadixSort::SortKeysDescending<KeyT>
         infoMap.put(new Info("cub::DeviceRadixSort::SortKeysDescending<float>").javaNames("SortKeysDescending"));
         infoMap.put(new Info("cub::DeviceRadixSort::SortKeysDescending<int>").javaNames("SortKeysDescending"));
-      
+    }
+    
+    private static void device_reduce(InfoMap infoMap)
+    {
         // cub::DeviceReduce::Reduce<InputIteratorT,OutputIteratorT,ReductionOpT,T>
         // infoMap.put(new Info("cub::DeviceReduce::Reduce<float*,float*,ReductionOpT,T>").javaNames("Reduce"));
         // infoMap.put(new Info("cub::DeviceReduce::Reduce<int*,int*,ReductionOpT,T>").javaNames("Reduce"));
-    
+
         // cub::DeviceReduce::Sum<InputIteratorT,OutputIteratorT>
         infoMap.put(new Info("cub::DeviceReduce::Sum<float*,float*>").javaNames("Sum"));
         infoMap.put(new Info("cub::DeviceReduce::Sum<int*,int*>").javaNames("Sum"));
-    
-        
+
         // cub::DeviceReduce::Min<InputIteratorT,OutputIteratorT>
         infoMap.put(new Info("cub::DeviceReduce::Min<float*,float*>").javaNames("Min"));
         infoMap.put(new Info("cub::DeviceReduce::Min<int*,int*>").javaNames("Min"));
-    
+
         // cub::DeviceReduce::ArgMin<InputIteratorT,OutputIteratorT>
         // infoMap.put(new Info("cub::DeviceReduce::ArgMin<float*,float*>").javaNames("ArgMin"));
         // infoMap.put(new Info("cub::DeviceReduce::ArgMin<int*,int*>").javaNames("ArgMin"));
-    
+
         // cub::DeviceReduce::Max<InputIteratorT,OutputIteratorT>
         infoMap.put(new Info("cub::DeviceReduce::Max<float*,float*>").javaNames("Max"));
         infoMap.put(new Info("cub::DeviceReduce::Max<int*,int*>").javaNames("Max"));
-    
+
         // cub::DeviceReduce::ArgMax<InputIteratorT,OutputIteratorT>
         // infoMap.put(new Info("cub::DeviceReduce::ArgMax<float*,float*>").javaNames("ArgMax"));
         // infoMap.put(new Info("cub::DeviceReduce::ArgMax<int*,int*>").javaNames("ArgMax"));
-    
+
         // cub::DeviceReduce::ReduceByKey<KeysInputIteratorT,UniqueOutputIteratorT,ValuesInputIteratorT,AggregatesOutputIteratorT,NumRunsOutputIteratorT,ReductionOpT>
-        // infoMap.put(new Info("cub::DeviceReduce::ReduceByKey<Keysfloat*,Uniquefloat*,Valuesfloat*,Aggregatesfloat*,NumRunsfloat*,ReductionOpT>").javaNames("ReduceByKey"));
-        // infoMap.put(new Info("cub::DeviceReduce::ReduceByKey<Keysint*,Uniqueint*,Valuesint*,Aggregatesint*,NumRunsint*,ReductionOpT>").javaNames("ReduceByKey"));
-        
-        
-        infoMap.put(new Info("cub::DeviceScan::ExclusiveSum<int*,int*>").javaNames("ExclusiveSum"));
-        infoMap.put(new Info("cub::DeviceScan::InclusiveSum<int*,int*>").javaNames("InclusiveSum"));
+        // infoMap.put(new Info("cub::DeviceReduce::ReduceByKey<KeysInputIteratorT,UniqueOutputIteratorT,ValuesInputIteratorT,AggregatesOutputIteratorT,unsigned int,ReductionOpT>").javaNames("ReduceByKey"));
     }
+    
+    private static void device_run_length_encode(InfoMap infoMap)
+    {
+        // cub::DeviceRunLengthEncode::Encode<InputIteratorT,UniqueOutputIteratorT,LengthsOutputIteratorT,NumRunsOutputIteratorT>
+        infoMap.put(new Info("cub::DeviceRunLengthEncode::Encode<float*,float*,unsigned int*,unsigned int*>").javaNames("Encode"));
+        infoMap.put(new Info("cub::DeviceRunLengthEncode::Encode<int*,int*,unsigned int*,unsigned int*>").javaNames("Encode"));
+
+        // cub::DeviceRunLengthEncode::NonTrivialRuns<InputIteratorT,OffsetsOutputIteratorT,LengthsOutputIteratorT,NumRunsOutputIteratorT>
+        infoMap.put(new Info("cub::DeviceRunLengthEncode::NonTrivialRuns<float*,unsigned int*,unsigned int*,unsigned int*>").javaNames("NonTrivialRuns"));
+        infoMap.put(new Info("cub::DeviceRunLengthEncode::NonTrivialRuns<int*,unsigned int*,unsigned int*,unsigned int*>").javaNames("NonTrivialRuns"));
+    }
+
 }

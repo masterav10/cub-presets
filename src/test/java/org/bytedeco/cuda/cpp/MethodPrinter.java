@@ -148,8 +148,8 @@ public class MethodPrinter
         Path path = includeDir.resolve("cub")
                               .resolve("device");
 
-        //final String suffix = ".cuh";
-        final String suffix = "device_partition.cuh";
+        // final String suffix = ".cuh";
+        final String suffix = "device_run_length_encode.cuh";
 
         List<Path> allFiles = Files.walk(path, 1)
                                    .filter(p ->

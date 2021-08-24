@@ -9,7 +9,6 @@ import org.bytedeco.cuda.cpp.MultiListIndexIterator.Result;
 
 public class CubTemplates
 {
-    private static final String[] POINTER_TYPES;
     private static final String[] VALUE_TYPES;
     private static final String[] COUNTER_TYPES;
     private static final String[] OFFSET_TYPES;
@@ -22,9 +21,6 @@ public class CubTemplates
         VALUE_TYPES = new String[]
         { "float", "int" };
 
-        POINTER_TYPES = new String[VALUE_TYPES.length];
-        Arrays.setAll(POINTER_TYPES, i -> VALUE_TYPES[i] + "*");
-
         OFFSET_TYPES = new String[]
         { "int" };
 
@@ -36,6 +32,13 @@ public class CubTemplates
 
         CHANNEL_SUFFIX = new String[CHANNEL_VALUES.length];
         Arrays.setAll(CHANNEL_SUFFIX, i -> CHANNEL_VALUES[i] + "Channel");
+    }
+
+    private static String[] asPointers(String[] src)
+    {
+        String[] pointerArray = new String[src.length];
+        Arrays.setAll(pointerArray, i -> src[i] + "*");
+        return pointerArray;
     }
 
     private static TemplateResolverByReplacement.Builder byReplacement()
@@ -78,35 +81,35 @@ public class CubTemplates
     private TemplateResolver OffsetsOutputIteratorT()
     {
         return byReplacement().template("OffsetsOutputIteratorT")
-                              .addReplacements(COUNTER_TYPES)
+                              .addReplacements(asPointers(COUNTER_TYPES))
                               .build();
     }
 
     private TemplateResolver NumRunsOutputIteratorT()
     {
         return byReplacement().template("NumRunsOutputIteratorT")
-                              .addReplacements(COUNTER_TYPES)
+                              .addReplacements(asPointers(COUNTER_TYPES))
                               .build();
     }
 
     private TemplateResolver LengthsOutputIteratorT()
     {
         return byReplacement().template("LengthsOutputIteratorT")
-                              .addReplacements(COUNTER_TYPES)
+                              .addReplacements(asPointers(COUNTER_TYPES))
                               .build();
     }
 
     private TemplateResolver UniqueOutputIteratorT()
     {
         return byReplacement().template("UniqueOutputIteratorT")
-                              .addReplacements(POINTER_TYPES)
+                              .addReplacements(asPointers(VALUE_TYPES))
                               .build();
     }
 
     private TemplateResolver ValueT()
     {
         return byReplacement().template("ValueT")
-                              .addReplacements(POINTER_TYPES)
+                              .addReplacements(VALUE_TYPES)
                               .build();
     }
 
@@ -127,7 +130,7 @@ public class CubTemplates
     private static TemplateResolver InputIteratorT()
     {
         return byReplacement().template("InputIteratorT")
-                              .addReplacements(POINTER_TYPES)
+                              .addReplacements(asPointers(VALUE_TYPES))
                               .build();
     }
 
@@ -141,7 +144,7 @@ public class CubTemplates
     private static TemplateResolver OutputIteratorT()
     {
         return byReplacement().template("OutputIteratorT")
-                              .addReplacements(POINTER_TYPES)
+                              .addReplacements(asPointers(VALUE_TYPES))
                               .build();
     }
 
@@ -173,7 +176,7 @@ public class CubTemplates
     private static TemplateResolver SampleIteratorT()
     {
         return byReplacement().template("SampleIteratorT")
-                              .addReplacements(POINTER_TYPES)
+                              .addReplacements(asPointers(VALUE_TYPES))
                               .build();
     }
 
