@@ -111,12 +111,13 @@ task jniJavacpp(type: JavaExec, dependsOn: compileJavacppJava) {
 	}
 }
 
-task generateAll(dependsOn: jniJavacpp)
+task generateAll(dependsOn: [generateGrammarSource,generateJavacppGrammarSource,generateTestGrammarSource])
 
-jar.dependsOn generateAll
+jar.dependsOn jniJavacpp
 
 jar {
 	from sourceSets.javacpp.java
+	from sourceSets.javacpp.resources
 }
 
 test {
