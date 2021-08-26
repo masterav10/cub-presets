@@ -1,17 +1,16 @@
 plugins {
 	id 'java-library'
+	id 'org.bytedeco.gradle-javacpp-build' version "$javacppVersion"
 	id 'eclipse'
 	id 'antlr'
 	id 'org.inferred.processors' version '3.3.0'
 }
 
 ext {
-	javacppVersion = '1.5.5'
-	cudaVersion = '11.2-8.1'
 	arch = 'windows-x86_64'
 }
 
-version "$cudaVersion-$javacppVersion"
+version "$cudaPresetsVersion-$javacppVersion"
 
 repositories {
     maven { url 'https://repo.gradle.org/gradle/libs-releases' }
@@ -43,13 +42,16 @@ configurations {
 
 dependencies {
 	antlr 'org.antlr:antlr4:4.7.2'
-
 	processor 'org.inferred:freebuilder:2.7.0'
+	
+	api "org.bytedeco:javacpp:$javacppVersion"
+
 	implementation platform("org.springframework.boot:spring-boot-dependencies:2.5.0")
 
 	implementation "org.slf4j:slf4j-simple"
+	
 	implementation "org.bytedeco:javacpp-platform:$javacppVersion"
-	implementation "org.bytedeco:cuda-platform:$cudaVersion-$javacppVersion"
+	implementation "org.bytedeco:cuda-platform:$cudaPresetsVersion-$javacppVersion"
 
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation 'org.assertj:assertj-core'
