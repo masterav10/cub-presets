@@ -1,6 +1,5 @@
 plugins {
 	id 'java-library'
-	id 'org.bytedeco.gradle-javacpp-build' version "$javacppVersion"
 	id 'eclipse'
 	id 'antlr'
 	id 'org.inferred.processors' version '3.3.0'
@@ -75,7 +74,7 @@ task javacppGenerate(type: JavaExec, dependsOn: [compileJava]) {
 	workingDir = sourceSets.main.java.outputDir
 	
 	// port 5005; can debug using eclipse Remote Java Application
-	debug = false
+	debug = true
 	
 	doFirst {
 		// arguments to pass to the application
