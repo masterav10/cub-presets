@@ -29,6 +29,11 @@ sourceSets {
 			srcDirs = ["${buildDir}/javacpp/resources"]
 		}
 	}
+	
+	test {
+		compileClasspath += sourceSets.javacpp.output
+        runtimeClasspath += sourceSets.javacpp.output
+	}
 }
 
 configurations {
